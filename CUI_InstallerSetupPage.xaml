@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Koboldcs.CUI_InstallerSetupPage"
+             Title="ComfyUI Setup">
+    <ContentPage.Resources>
+        <!-- Define a style for all buttons -->
+        <Style TargetType="Button">
+            <Setter Property="HorizontalOptions" Value="Start" />
+            <Setter Property="WidthRequest" Value="300" />
+            <Setter Property="BackgroundColor" Value="#1E90FF" />
+            <!-- Default Blue -->
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="FontSize" Value="Medium" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Margin" Value="0,10,0,0" />
+        </Style>
+    </ContentPage.Resources>
+
+    <ContentPage.Content>
+        <VerticalStackLayout Padding="15" Spacing="25">
+            <Label 
+                Text="Welcome to the ComfyUI Setup!"
+                HorizontalOptions="Start"
+                FontSize="Large"
+                TextColor="White"/>
+
+            <Frame BorderColor="White"></Frame>
+
+            <Frame BorderColor="Black" Margin="10" x:Name="DwControlBar">
+                <VerticalStackLayout Spacing="10">
+                     <Button 
+                        x:Name="Button1"
+                        TextColor="Cyan"
+                        BorderWidth="1"
+                        BackgroundColor="Black"
+                        BorderColor="Cyan"
+                        Text="1. Install ComfyUI with ExtendedAPIHook extension"
+                        Clicked="OnInstallComfyUIWithExtensionClicked" />
+
+                    <Button 
+                        x:Name="Button2"
+                        BackgroundColor="Black"
+                        BorderColor="Cyan"
+                        BorderWidth="1"
+                        TextColor="Cyan"
+                        Text="2. Install ComfyUI only"
+                        Clicked="OnInstallComfyUIOnlyClicked"/>
+
+                    <Button 
+                        x:Name="Button3"
+                        BackgroundColor="Black"
+                        BorderColor="Cyan"
+                        BorderWidth="1"
+                        TextColor="Cyan"
+                        Text="3. Install ExtendedAPIHook to an existing ComfyUI instance"
+                        Clicked="OnInstallExtensionOnlyClicked" />
+
+                    <Button 
+                        x:Name="Button4"
+                        Text="4. Cancel Setup"
+                        BorderColor="OrangeRed"
+                        BackgroundColor="Black"
+                        BorderWidth="1"
+                        TextColor="OrangeRed"
+                        Clicked="OnCancelSetupClicked" />
+                </VerticalStackLayout>
+            </Frame>
+
+
+            <Frame BorderColor="Black" Margin="20" x:Name="DwInfoBar" IsVisible="False">
+                <VerticalStackLayout>
+                    <Label>
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span x:Name="DownloadedSize" Text="?"></Span>
+                                <Span Text="/"></Span>
+                                <Span x:Name="DownloadSize" Text="?"></Span>
+                                <Span Text=" GB   |   Speed: " TextColor="Lime"></Span>
+                                <Span x:Name="DownloadSpeed" Text="?"></Span>
+                                <Span Text=" MB/s   |   Status: " TextColor="Lime"></Span>
+                                <Span x:Name="DownloadState" Text="-" TextColor="Lime"></Span>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <ProgressBar x:Name="DownloadProgressBar" Progress="0" ProgressColor="Cyan" ScaleY="2"/>
+
+                    <Label x:Name="ProgressLabel" Text="0%" HorizontalOptions="Center" />
+                    <HorizontalStackLayout HorizontalOptions="End" Spacing="0">
+                        <Button Text="Cancel Download" BorderColor="Red" BorderWidth="1" BackgroundColor="Transparent" TextColor="Red" Scale="0.9" Clicked="OnCancelDownloadClicked" />
+                        <Button Text="Pause Download" BorderColor="Cyan" BorderWidth="1" BackgroundColor="Transparent" TextColor="Cyan" Scale="0.9" Clicked="OnPauseDownloadClicked" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ContentPage.Content>
+</ContentPage>

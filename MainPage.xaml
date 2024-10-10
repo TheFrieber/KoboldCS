@@ -1,0 +1,1468 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Koboldcs.MainPage"
+             xmlns:func="clr-namespace:Koboldcs.Funcs"
+             xmlns:uie="clr-namespace:Koboldcs.UI_Elements"
+             BackgroundColor="Gray">
+
+    <ContentPage.Resources>
+        <Style TargetType="Entry">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="PlaceholderColor" Value="#888"/>
+            <Setter Property="BackgroundColor" Value="#fff"/>
+            <Setter Property="TextColor" Value="#000"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="TextColor" Value="#fff"/>
+            <Setter Property="BackgroundColor" Value="#007aff"/>
+        </Style>
+        <Style x:Key="TabButtonStyle" TargetType="Button">
+            <Setter Property="BackgroundColor" Value="#007aff"/>
+            <Setter Property="TextColor" Value="Black"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="BorderColor" Value="Gray"/>
+            <Setter Property="BorderWidth" Value="1"/>
+            <Setter Property="FontAttributes" Value="Bold"/>
+            <Setter Property="HeightRequest" Value="40"/>
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid>
+        <!-- Define rows -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <!-- Top Bar -->
+            <RowDefinition Height="*"/>
+            <!-- Main Content -->
+            <RowDefinition Height="Auto"/>
+            <!-- Entry and Send Button -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top Bar -->
+        <Grid Grid.Row="0"
+              BackgroundColor="LightGray"
+              Padding="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Menu Button (Hamburger Icon) -->
+            <Grid Grid.Column="0" WidthRequest="40" HeightRequest="33">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+
+
+                <!-- Frame with Shadow for Anti-Aliasing -->
+                <Frame BackgroundColor="Black"
+                       HasShadow="True"
+                       CornerRadius="2"
+                       Padding="0"
+                       HeightRequest="5"
+                       HorizontalOptions="FillAndExpand"
+                       Grid.Row="0"/>
+                <Frame BackgroundColor="Black"
+                       HasShadow="True"
+                       CornerRadius="2"
+                       Padding="0"
+                       HeightRequest="5"
+                       HorizontalOptions="FillAndExpand"
+                       Grid.Row="1"/>
+                <Frame BackgroundColor="Black"
+                       HasShadow="True"
+                       CornerRadius="2"
+                       Padding="0"
+                       HeightRequest="5"
+                       HorizontalOptions="FillAndExpand"
+                       Grid.Row="2"/>
+
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnMenuTapped"/>
+                </Grid.GestureRecognizers>
+            </Grid>
+
+            <HorizontalStackLayout HorizontalOptions="End" Grid.Column="1">
+                <Image Source="koboldsharp.png" HorizontalOptions="End" Grid.Column="1" Margin="0,0,5,0"/>
+
+                <Label Text="KoboldCS 1.0.0"
+                               VerticalOptions="Center"
+                               HorizontalOptions="End"
+                               Grid.Column="1"
+                               FontSize="20"
+                               TextColor="Cyan"
+                               FontAttributes="Bold"/>
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- Main Content -->
+        <ContentView x:Name="ContentArea"
+                 Grid.Row="1"
+                 VerticalOptions="FillAndExpand"
+                 HorizontalOptions="FillAndExpand">
+            <CollectionView x:Name="MessagesCollectionView"
+                        ItemsSource="{Binding Messages}"
+                        ItemsUpdatingScrollMode="KeepScrollOffset">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout Orientation="Horizontal">
+                            <Frame CornerRadius="10" 
+                                   HasShadow="False"
+                                   Padding="0"
+                                   VerticalOptions="Start"
+                                   Margin="5"
+                                   BackgroundColor="Transparent"
+                                   WidthRequest="100">
+                                <Image Source="{Binding ProfileImage}" 
+                                       Aspect="AspectFit">
+                                </Image>
+                                <Frame.Triggers>
+                                    <DataTrigger TargetType="Frame" Binding="{Binding IsUser}" Value="True">
+                                        <Setter Property="IsVisible" Value="False" />
+                                    </DataTrigger>
+                                </Frame.Triggers>
+                            </Frame>
+
+                            <Frame Margin="5"
+                               Padding="10"
+                               BorderColor="Transparent"
+                               CornerRadius="15"
+                               HorizontalOptions="FillAndExpand"
+                               BackgroundColor="{Binding IsUser, Converter={StaticResource BoolToColorConverter}}">
+                                <StackLayout>
+                                    <Label IsVisible="{Binding IsEditing, Converter={StaticResource InverseBoolConverter}}" FontFamily="Arial">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding Title}" Style="{Binding IsUser, Converter={StaticResource UserTitleStyleConverter}}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+
+                                    <!-- Text Label with Formatting -->
+                                    <func:FormattedTextBlock Text="{Binding Text}" ImageByteArrays="{Binding Images}" />
+                                    <Editor IsVisible="{Binding IsEditing}"
+                                       Text="{Binding Text, Mode=TwoWay}"
+                                       Placeholder="Message"
+                                       VerticalOptions="FillAndExpand"
+                                       TextColor="OrangeRed"
+                                       HeightRequest="100"
+                                       BackgroundColor="LightBlue"
+                                       Margin="0,0,0,5"/>
+                                    <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Spacing="0">
+                                        <Button Text="&lt;"
+                                                FontSize="20"
+                                                TranslationY="9"
+                                                VerticalOptions="End"
+                                                Command="{Binding BindingContext.NavigateRetryCommandDown, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                CommandParameter="{Binding .}" 
+                                                BackgroundColor="Transparent"
+                                                TextColor="Cyan"
+                                                IsVisible="{Binding IsLastMessage}" />
+                                        <Label Text="{Binding CurrentRetryText}" 
+                                               FontSize="Micro" 
+                                               VerticalOptions="End" 
+                                               Margin="5,0"
+                                               TextColor="Black"
+                                               IsVisible="{Binding IsLastMessage}" />
+                                        <Button Text=">"
+                                                FontSize="20"
+                                                TranslationY="9"
+                                                VerticalOptions="End"
+                                                Command="{Binding BindingContext.NavigateRetryCommandUp, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="Transparent"
+                                                TextColor="Cyan"
+                                                
+                                                IsVisible="{Binding IsLastMessage}" />
+                                    </StackLayout>
+                                </StackLayout>
+                            </Frame>
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ContentView>
+
+
+        <!-- Welcome Message Overlay -->
+        <ContentView IsVisible="{Binding Messages.Count, Converter={StaticResource InverseIntToBoolConverter}}"
+                 BackgroundColor="Transparent"
+                 VerticalOptions="FillAndExpand"
+                 Grid.Row="1"
+                 HorizontalOptions="FillAndExpand">
+            <ContentView.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="Black" Offset="0.0"/>
+                    <GradientStop Color="Transparent" Offset="1.0"/>
+                </LinearGradientBrush>
+            </ContentView.Background>
+            <Frame BackgroundColor="White"
+                   Margin="25"
+                   BorderColor="White"
+                   Padding="10"
+                   HorizontalOptions="CenterAndExpand"
+                   VerticalOptions="Start">
+                <Frame.Background>
+                    <LinearGradientBrush x:Name="GradientBrush" StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="OrangeRed" Offset="0.0"/>
+                        <GradientStop Color="Teal" Offset="1.0"/>
+                    </LinearGradientBrush>
+                </Frame.Background>
+                <StackLayout Orientation="Vertical"
+                         HorizontalOptions="CenterAndExpand"
+                         VerticalOptions="Start"
+                         Padding="20">
+                    <Image Source="koboldsharp.png" 
+                       Aspect="AspectFit"
+                       WidthRequest="100"
+                       HeightRequest="100"/>
+                    <Label HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Start">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Welcome to " TextColor="Black" FontSize="20"/>
+                                <Span Text="KoboldCS!" TextColor="Cyan" FontSize="20"/>
+
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Label HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Start">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="You are currently using the model " TextColor="Black" FontSize="20"/>
+                                <Span Text="{Binding SelectedModel}" TextColor="Lime" FontSize="20"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Label HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Start">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="You are using the UI of " TextColor="black" FontSize="20"/>
+                                <Span Text="KoboldCS" TextColor="Cyan" FontSize="20"/>
+
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Frame Margin="5"/>
+                    <Label HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Start">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding SelectedUsageModeName}" TextColor="Cyan" FontSize="20"/>
+                                <Span Text=" Selected - Enter a prompt below to begin!" TextColor="Black" FontSize="20"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Label HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Start">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Or, load a " TextColor="Black" FontSize="20"/>
+                                <Span Text="JSON File" TextColor="Lime" FontSize="20"/>
+                                <Span Text=" or a " TextColor="Black" FontSize="20"/>
+                                <Span Text="Character Card" TextColor="Lime" FontSize="20"/>
+                                <Span Text=" here. Or, select a " TextColor="Black" FontSize="20"/>
+                                <Span Text="Quick Start Scenario." TextColor="Lime" FontSize="20"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </StackLayout>
+            </Frame>
+            
+        </ContentView>
+
+
+        <ContentView x:Name="AdditionalBar"
+              Grid.Row="2"
+              BackgroundColor="Transparent"
+              IsVisible="False"
+              TranslationY="40"
+              HorizontalOptions="EndAndExpand"
+              Padding="5">
+            <Border BackgroundColor="Transparent" StrokeShape="RoundRectangle 10,10,10,10" StrokeThickness="3">
+                <HorizontalStackLayout BackgroundColor="Black" Padding="5">
+
+                    <Button Grid.Column="0" Text="Context" BackgroundColor="#007aff" TextColor="White" Margin="3" Clicked="ContextBtnClicked"/>
+                    <Button Grid.Column="1" Text="Back" BackgroundColor="#007aff" TextColor="White" Margin="3" Command="{Binding BackCommand}"/>
+                    <Button Grid.Column="2" Text="Redo" BackgroundColor="#007aff" TextColor="White" Margin="3" Command="{Binding RedoCommand}"/>
+                    <Button Grid.Column="3" Text="Retry" BackgroundColor="#007aff" TextColor="White" Margin="3" Command="{Binding RetryCommand}"/>
+                    <Button Grid.Column="4" Text="Add Img" BackgroundColor="#007aff" TextColor="White" Margin="3" Clicked="AddImgBtnClicked"/>
+                    <Button Grid.Column="5" Text="Edit" BackgroundColor="#007aff" TextColor="White" Margin="3" Command="{Binding ToggleEditCommand}"/>
+                </HorizontalStackLayout>
+            </Border>
+        </ContentView>
+
+
+        <!-- Entry and Send Button -->
+        <Grid Grid.Row="3"
+              Padding="10"
+              BackgroundColor="#ffffff"
+              ColumnSpacing="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Entry x:Name="MessageEntry"
+                   Grid.Column="0"
+                   Placeholder="Type a message" 
+                   Text="{Binding MessageText, Mode=TwoWay}"
+                   Completed="OnMessageEntryCompleted" TextColor="Black"
+                    />
+
+            <Button Grid.Column="1"
+                    TextColor="White"
+                    Text="{Binding CancelableButton}"
+                    PropertyChanged="SendButton_PropertyChanged"
+                    Command="{Binding SendMessageCommand}"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+
+            <Button Grid.Column="2" 
+                    Text="˅" 
+                    Command="{Binding ToggleBarCommand}" 
+                    Clicked="OnToggleBarClicked" 
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"
+                    BackgroundColor="#007aff" 
+                    TextColor="White" 
+                    WidthRequest="40"
+                    HeightRequest="40" 
+                    CornerRadius="20"/>
+        </Grid>
+
+        <!-- Black Alpha Background (Overlay) -->
+        <BoxView x:Name="Overlay"
+                 Color="Black"
+                 Opacity="0"
+                 IsVisible="False"
+                 Grid.Row="1"
+                 Grid.RowSpan="3"
+                 HorizontalOptions="FillAndExpand"
+                 VerticalOptions="FillAndExpand">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnOverlayTapped" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+
+        <!-- Side Menu (initially hidden) -->
+        <Frame x:Name="SideMenu"
+       IsVisible="False"
+       BackgroundColor="LightGray"
+       HasShadow="True"
+       Padding="20"
+       CornerRadius="8"
+       WidthRequest="250"
+       HeightRequest="245"
+       VerticalOptions="Start"
+       HorizontalOptions="Start"
+       TranslationX="-250"
+       Grid.Row="1">
+
+            <StackLayout>
+                <Button Text="New Session"
+                BackgroundColor="#007aff"
+                TextColor="White"
+                Clicked="NewSession_Clicked"
+                Margin="3"
+                IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+
+                <Button Text="Scenarios"
+                BackgroundColor="#007aff"
+                TextColor="White"
+                Clicked="Scenarios_Clicked"
+                Margin="3"
+                IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+
+                <Button Text="Save/Load"
+                BackgroundColor="#007aff"
+                TextColor="White"
+                Clicked="SaveLoad_Clicked"
+                Margin="3"
+                IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+
+                <Button Text="Settings"
+                BackgroundColor="#007aff"
+                TextColor="White"
+                Clicked="Settings_Clicked"
+                Margin="3"
+                IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+            </StackLayout>
+        </Frame>
+
+        <!-- Panels -->
+        <ContentView x:Name="NewSessionPanel"
+                     IsVisible="False"
+                     BackgroundColor="Transparent" 
+                     Grid.Row="0" Grid.RowSpan="2" 
+                     HorizontalOptions="Center" 
+                     VerticalOptions="Center" 
+                     WidthRequest="380" 
+                     HeightRequest="180">
+            <Frame BackgroundColor="White" 
+                   CornerRadius="10"
+                   Padding="5"
+                   HasShadow="True">
+                <StackLayout>
+                    <Label Text="Really Start a New Story?"
+                               FontSize="21"
+                               FontAttributes="Bold"
+                               TextColor="Black"
+                               HorizontalOptions="Center"/>
+                    <Label Text="Unsaved data will be lost. Memory will be kept." 
+                               FontSize="16" 
+                               TextColor="Black"
+                               HorizontalOptions="Center"
+                               Margin="8"/>
+                    <Frame Margin="0"/>
+                    <StackLayout Orientation="Horizontal"
+                                 HorizontalOptions="Center">
+                        <CheckBox x:Name="KeepContextCheckBox"
+                                  HorizontalOptions="Center"
+                                  VerticalOptions="Center"
+                                  IsChecked="{Binding KeepContext}"
+                                  Color="#007aff"/>
+                        <Label Text="Keep Context"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"
+                               TextColor="Black"/>
+                    </StackLayout>
+                    <StackLayout Orientation="Horizontal"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="EndAndExpand">
+                        <Button Text="Ok" 
+                                FontSize="21"
+                                Margin="5"
+                                BackgroundColor="#007aff"
+                                Clicked="OkNewSession_Clicked"
+                                Command="{Binding StartNewSessionCommand}"/>
+                        <Button Text="Cancel"
+                                FontSize="21"
+                                Margin="5"
+                                BackgroundColor="#007aff"
+                                Clicked="CancelNewSession_Clicked"/>
+                    </StackLayout>
+                </StackLayout>
+            </Frame>
+        </ContentView>
+
+        <ContentView x:Name="ScenariosPanel" 
+                     IsVisible="False" 
+                     BackgroundColor="White" 
+                     Grid.Row="0" 
+                     Grid.RowSpan="2" 
+                     HorizontalOptions="Center" 
+                     VerticalOptions="Center" 
+                     WidthRequest="800" 
+                     HeightRequest="400">
+            <Label Text="Scenarios Panel"
+                   TextColor="Black"
+                   VerticalOptions="CenterAndExpand" 
+                   HorizontalOptions="CenterAndExpand" />
+        </ContentView>
+
+        <ContentView x:Name="SaveLoadPanel" 
+                     IsVisible="False" 
+                     BackgroundColor="Transparent" 
+                     Grid.Row="0" 
+                     Grid.RowSpan="2" 
+                     HorizontalOptions="Center" 
+                     VerticalOptions="Center" 
+                     WidthRequest="800" 
+                     HeightRequest="400">
+            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10,10,10,10">
+                <Grid>
+                    <!-- Define the row and column definitions -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <!-- Row for side menu -->
+                        <RowDefinition Height="*"/>
+                        <!-- Row for content -->
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+
+                        <ColumnDefinition Width="*"/>
+                        <!-- Side menu width -->
+                        <ColumnDefinition Width="170"/>
+                        <!-- Content area -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- TopBar -->
+                    <StackLayout BackgroundColor="Black" Grid.ColumnSpan="2" HorizontalOptions="FillAndExpand">
+                        <Label Text="Save / Load" FontSize="11" HorizontalTextAlignment="Center"/>
+
+                        <Button Text="X"
+                    TranslationY="-29"
+                    TranslationX="11"
+                    BorderColor="Transparent"
+                    Scale="0.5"
+                    FontSize="19"
+                    CornerRadius="0"
+                    Clicked="OnXButtonClicked"
+                    TextColor="Red"
+                    BorderWidth="1"
+                    BackgroundColor="Transparent"
+                    HorizontalOptions="End">
+                        </Button>
+                    </StackLayout>
+
+                    <!-- Side Menu -->
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" BackgroundColor="DarkGray" Padding="10" Spacing="5">
+                        <Button Text="Import" BackgroundColor="#007aff"/>
+                        <Button Text="Open Save Folder" BackgroundColor="#007aff"/>
+                        <Frame></Frame>
+                        <Button Text="Save Chat" BackgroundColor="#007aff"/>
+                        <Button Text="Save Config" BackgroundColor="#007aff"/>
+                        <Button 
+                                Text="Save Advanced" 
+                                ImageSource="warningcircle.png"
+                                ContentLayout="Left, 1"
+                                Padding="15"
+                                MaximumHeightRequest="50" 
+                                BackgroundColor="#007aff"/>
+                    </VerticalStackLayout>
+
+                    <HorizontalStackLayout Grid.Row="2" Grid.Column="1" HeightRequest="110" BackgroundColor="Black" Padding="5">
+                        <Image Source="warningcircle.png" Aspect="AspectFit" Scale="0.3" TranslationX="-32" TranslationY="-32"/>
+                        <VerticalStackLayout>
+                            <Label Text="Advanced Saves" TranslationX="-55" TextColor="OrangeRed"/>
+                            <Label Text="are KoboldCS " TranslationX="-55" TextColor="OrangeRed"/>
+                            <Label Text="specific and won't be" TranslationX="-100" TextColor="OrangeRed"/>
+                            <Label Text="compatible with" TranslationX="-100" TextColor="OrangeRed"/>
+                            <Label Text="KoboldCPP" TranslationX="-100" TextColor="OrangeRed"/>
+                        </VerticalStackLayout>
+                       
+                        
+                    </HorizontalStackLayout>
+                    
+
+                    <!-- Content Area -->
+                    <ScrollView Grid.RowSpan="3" Grid.Row="1" Grid.Column="0" BackgroundColor="White" VerticalOptions="FillAndExpand" VerticalScrollBarVisibility="Always" >
+                        <Grid Padding="10" IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}">
+                            
+                            <!-- Format Tab Content -->
+                            
+
+                        </Grid>
+                    </ScrollView>
+                </Grid>
+            </Border>
+        </ContentView>
+
+        
+        
+        
+        
+        
+        
+        <!-- Setting Panel -->
+        <ContentView x:Name="SettingsPanel"
+             IsVisible="False"
+             BackgroundColor="Transparent"
+             Grid.Row="0"
+             Grid.RowSpan="2"
+             HorizontalOptions="Center"
+             VerticalOptions="Center"
+             WidthRequest="800"
+             HeightRequest="400">
+            <Border BackgroundColor="Black" StrokeThickness="0" StrokeShape="RoundRectangle 10,10,10,10">
+                <Grid>
+                    <!-- Define the row and column definitions -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <!-- Row for side menu -->
+                        <RowDefinition Height="*"/>
+                        <!-- Row for content -->
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+
+                        <ColumnDefinition Width="150"/>
+                        <!-- Side menu width -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- Content area -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- TopBar -->
+                    <StackLayout BackgroundColor="Black" Grid.ColumnSpan="2" HorizontalOptions="FillAndExpand">
+                        <Label Text="Settings" FontSize="11" HorizontalTextAlignment="Center"/>
+
+                        <Button Text="X"
+                                TranslationY="-29"
+                                TranslationX="11"
+                                BorderColor="Transparent"
+                                Scale="0.5"
+                                FontSize="19"
+                                CornerRadius="0"
+                                Clicked="OnXButtonClicked"
+                                TextColor="Red"
+                                BorderWidth="1"
+                                BackgroundColor="Transparent"
+                                HorizontalOptions="End">
+                        </Button>
+                    </StackLayout>
+
+                    <!-- Side Menu -->
+                    <StackLayout
+                             Grid.Column="0"
+                             Grid.Row="2"
+                             BackgroundColor="DarkGray"
+                             Orientation="Vertical">
+                        <Button x:Name="FormatTabButton" 
+                            Text="Format" 
+                            Clicked="OnTabButtonClicked"
+                            Command="{Binding TabSelectedCommand}"
+                            CommandParameter="FormatTab"
+                            Style="{StaticResource TabButtonStyle}"
+                            BackgroundColor="Transparent"
+                            BorderColor="Transparent"
+                            Padding="10,10">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding SelectedTab}" Value="FormatTab">
+                                    <Setter Property="BackgroundColor" Value="DimGrey"/>
+                                    <Setter Property="TextColor" Value="White"/>
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button x:Name="SamplersTabButton" 
+                            Text="Samplers"
+                            Command="{Binding TabSelectedCommand}"
+                            CommandParameter="SamplersTab"
+                            Clicked="OnTabButtonClicked" 
+                            Style="{StaticResource TabButtonStyle}"
+                            BackgroundColor="Transparent"
+                            BorderColor="Transparent"
+                            Padding="10,10">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding SelectedTab}" Value="SamplersTab">
+                                    <Setter Property="BackgroundColor" Value="DimGrey"/>
+                                    <Setter Property="TextColor" Value="White"/>
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button x:Name="MediaTabButton" 
+                            Text="Media" 
+                            Clicked="OnTabButtonClicked" 
+                            Command="{Binding TabSelectedCommand}"
+                            CommandParameter="MediaTab"
+                            Style="{StaticResource TabButtonStyle}"
+                            BackgroundColor="Transparent"
+                            BorderColor="Transparent"
+                            Padding="10,10">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding SelectedTab}" Value="MediaTab">
+                                    <Setter Property="BackgroundColor" Value="DimGrey"/>
+                                    <Setter Property="TextColor" Value="White"/>
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button x:Name="AdvancedTabButton" 
+                            Text="KoboldCS" 
+                            Clicked="OnTabButtonClicked"
+                            Command="{Binding TabSelectedCommand}"
+                            CommandParameter="AdvancedTab"
+                            Style="{StaticResource TabButtonStyle}"
+                            BackgroundColor="Transparent"
+                            BorderColor="Transparent"
+                            Padding="10,10">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding SelectedTab}" Value="AdvancedTab">
+                                    <Setter Property="BackgroundColor" Value="DimGrey"/>
+                                    <Setter Property="TextColor" Value="White"/>
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </StackLayout>
+
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <!-- Content Area -->
+                    <ScrollView Grid.Row="1" Grid.Column="1" BackgroundColor="White" VerticalOptions="FillAndExpand" VerticalScrollBarVisibility="Always" >
+                        <Grid Padding="10" IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}">
+                            <!-- Format Tab Content -->
+                            <VerticalStackLayout x:Name="FormatTabContent" IsVisible="True" Spacing="20">
+                                <Border BackgroundColor="Black" StrokeShape="RoundRectangle 10,10,10,10" MaximumHeightRequest="20">
+                                    <HorizontalStackLayout>
+                                        <Image Source="warningcircle.png" TranslationX="1"/>
+                                        <Label Text="Please hold your pointer over the questionmarks for about one second, without clicking it" FontSize="10" TranslationY="1" TranslationX="10"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Usage Mode:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Select the usage mode for the application." />
+                                        </HorizontalStackLayout>
+                                        <Picker x:Name="UsagePicker" BackgroundColor="Black" TextColor="White" TitleColor="Transparent" ItemsSource="{Binding Modes}" SelectedIndex="{Binding SelectedUsageMode}" />
+                                        <Frame Margin="10" IsVisible="{Binding IsInstructMode}"/>
+                                        <HorizontalStackLayout Spacing="0" IsVisible="{Binding IsInstructMode}">
+                                            <Label Text="Instruct Tag Preset:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Different models are trained with different Tags. Look at the Page where you downloaded your model from. This may improve quality and also probably fix possible issues."/>
+                                        </HorizontalStackLayout>
+                                        <Picker x:Name="InstructTagPresetPicker" BackgroundColor="Black" TextColor="White" TitleColor="Transparent" ItemsSource="{Binding ITPreset}" SelectedItem="{Binding SelectedPreset}" IsVisible="{Binding IsInstructMode}"/>
+                                        <Frame Margin="10" IsVisible="{Binding IsInstructMode}"/>
+
+                                        <!-- System Tag -->
+                                        <HorizontalStackLayout Spacing="0" IsVisible="{Binding IsInstructMode}">
+                                            <Label Text="System Tag:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Tag that will be put behind the System Prompt."/>
+                                        </HorizontalStackLayout>
+                                        <Entry x:Name="SystemTagEntry" BackgroundColor="Black" TextColor="White" Placeholder="(Unused)" Text="{Binding SystemTag}" IsVisible="{Binding IsInstructMode}"/>
+
+                                        <!-- System Prompt -->
+                                        <HorizontalStackLayout Spacing="0" IsVisible="{Binding IsInstructMode}">
+                                            <Label Text="System Prompt:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="A fixed system message sent at the very start to guide the AI behavior. Usually not needed."/>
+                                        </HorizontalStackLayout>
+                                        <Entry x:Name="SystemPromptEntry" BackgroundColor="Black" TextColor="White" Placeholder="(Unused)" Text="{Binding SystemPrompt}" IsVisible="{Binding IsInstructMode}"/>
+
+                                        <!-- User Tag -->
+                                        <HorizontalStackLayout Spacing="0" IsVisible="{Binding IsInstructMode}">
+                                            <Label Text="User Tag:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="This will come behind your prompt. It's like the Username just to tell the AI where the sequences are"/>
+                                        </HorizontalStackLayout>
+                                        <Entry x:Name="UserTagEntry" BackgroundColor="Black" TextColor="White" Placeholder="(Unused)" Text="{Binding UserTag}" IsVisible="{Binding IsInstructMode}"/>
+
+                                        <!-- Assistant Tag -->
+                                        <HorizontalStackLayout Spacing="0" IsVisible="{Binding IsInstructMode}">
+                                            <Label Text="Assistant Tag:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="This will come behind the AI's Response."/>
+                                        </HorizontalStackLayout>
+                                        <Entry x:Name="AITagEntry" BackgroundColor="Black" TextColor="White" Placeholder="(Unused)" Text="{Binding AITag}" IsVisible="{Binding IsInstructMode}"/>
+                                    </StackLayout>
+                                </Frame>
+
+                                <!-- Username Textbox -->
+                                <Frame BackgroundColor="White" IsVisible="{Binding IsChatMode}">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Your Name:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Enter your username here."/>
+                                        </HorizontalStackLayout>
+                                        <Entry Placeholder="User" BackgroundColor="Black" TextColor="White" PlaceholderColor="DimGray" Text="{Binding Username}"/>
+                                    </StackLayout>
+                                </Frame>
+
+                                <!-- AI name Textbox -->
+                                <Frame BackgroundColor="White" IsVisible="{Binding IsChatMode}">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="AI Name:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Enter the name of the AI."/>
+                                        </HorizontalStackLayout>
+                                        <Entry Placeholder="KoboldSharp" BackgroundColor="Black" TextColor="White" PlaceholderColor="DimGray" Text="{Binding AIName}"/>
+                                    </StackLayout>
+                                </Frame>
+
+                                <!-- Model/Context Loading Stuff -->
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Model:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Select a LLM to chat with."/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout>
+                                            <Entry x:Name="PathEntry" Placeholder="No path selected" BackgroundColor="Black" TextColor="White" PlaceholderColor="DimGray" WidthRequest="450" IsReadOnly="True"/>
+                                            <Button Text="Select Model" Clicked="selectModelClicked"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="10"/>
+                                        <HorizontalStackLayout>
+                                            <Button Text="Dispose Model" BackgroundColor="DarkRed" CornerRadius="10" Command="{Binding DisposeMdl}"/>
+                                            <Button Margin="93,0,0,0" Text="Advanced Settings" CornerRadius="10" BackgroundColor="Cyan" Clicked="OnAdvSettingsClicked"/>
+                                            <Button Margin="91,0,0,0" Text="Load Model" CornerRadius="10" Command="{Binding LoadMdl}"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="10"/>
+                                        <Button HorizontalOptions="Center" Text="Run Quick Benchmark" BackgroundColor="OrangeRed" CornerRadius="10"/>
+                                        <Frame Margin="10"/>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Context Size:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="The Memory of the AI. It can remember up to [ctx] Tokens"/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout>
+                                            <Entry x:Name="CtxSizeEntry" Placeholder="4096 | 4K" BackgroundColor="Black" TextColor="White" PlaceholderColor="DimGray" WidthRequest="150" IsReadOnly="True"/>
+                                            <Slider x:Name="CTXSlider" BackgroundColor="Black" WidthRequest="425" Minimum="1" MinimumTrackColor="OrangeRed" ThumbColor="OrangeRed" MaximumTrackColor="DimGray" Maximum="125" VerticalOptions="Center" Margin="5" ValueChanged="CTXSlider_ValueChanged"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="10"/>
+                                        <HorizontalStackLayout>
+                                            <Button Text="Dispose Context" BackgroundColor="DarkRed" CornerRadius="10" Command="{Binding DisposeCtx}"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Dispose Context will dispose the current loaded context. Load Context will Dispose entirely and assign new."/>
+                                            <Button Margin="268,0,0,0" Text="Load Context" CornerRadius="10" Command="{Binding LoadCtx}"/>
+                                        </HorizontalStackLayout>
+                                    </StackLayout>
+                                </Frame>
+                            </VerticalStackLayout>
+
+                            <!-- Samplers Tab Content -->
+                            <VerticalStackLayout x:Name="SamplersTabContent" IsVisible="False" Spacing="20">
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="General Sampler Settings:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Those are settings to affect the generator"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="5,0,5,10"></Frame>
+
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="MaxTokensToGenEntry" BackgroundColor="Black" TextColor="White" Text="512" Placeholder="512" MaxLength="6" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="MaxOutputEntry_TextChanged"></Entry>
+                                            <Label Text=" Max Tokens to generate" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="This is the amount of Tokens the AI is allowed to write"/>
+                                        </HorizontalStackLayout>
+
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="TempEntry" BackgroundColor="Black" TextColor="White" Text="0.7" Placeholder="0.7" MaxLength="8" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="TemperatureEntry_TextChanged"></Entry>
+                                            <Label Text=" Temperature" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Randomness of sampling. High values can increase creativity but may make text less sensible. Lower values will make text more predictable but can become repetitious"/>
+                                        </HorizontalStackLayout>
+
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="RepPenEntry" BackgroundColor="Black" TextColor="White" Text="1.1" Placeholder="1.1" MaxLength="8" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="RepPenEntry_TextChanged"></Entry>
+                                            <Label Text=" Repetition Penalty" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Lowers the probability scores of tokens that were recently used so that the model is less likely to repeat them (too high causes incoherence!)"/>
+                                        </HorizontalStackLayout>
+
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="TopPEntry" BackgroundColor="Black" TextColor="White" Text="0.92" Placeholder="0.92" MaxLength="8" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="TopPEntry_TextChanged"></Entry>
+                                            <Label Text=" Top-P Sampling" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Used to discard unlikely text in a nucleus sampling process. Lower values will make text more predictable but can become repetitious. Set to 1 to deactivate it"/>
+                                        </HorizontalStackLayout>
+
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="TopKEntry" BackgroundColor="Black" TextColor="White" Text="100" Placeholder="100" MaxLength="8" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="TopKEntry_TextChanged"></Entry>
+                                            <Label Text=" Top-K Sampling" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Top-K Sampling. Discards all but the K most likely tokens. Set 0 to Deactivate."/>
+                                        </HorizontalStackLayout>
+
+                                    </StackLayout>
+                                </Frame>
+                                
+                                <!-- Advanced Samplers Settings Content-->
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Advanced Sampler Settings:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="A little more stuff to mess with :)"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="5,0,5,10"></Frame>
+
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="TypicalEntry" BackgroundColor="Black" TextColor="White" Text="1.0" Placeholder="1.0" MaxLength="6" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="TypicalEntry_TextChanged"></Entry>
+                                            <Label Text=" Typical" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="A technique for generating text that balances coherence and diversity by sampling tokens based on their fit within the surrounding context. A value closer to 1 will promote more contextually coherent tokens, while a value closer to 0 will promote more diverse tokens"/>
+                                        </HorizontalStackLayout>
+
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="TFSEntry" BackgroundColor="Black" TextColor="White" Text="1.0" Placeholder="1.0" MaxLength="8" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="TFSEntry_TextChanged"></Entry>
+                                            <Label Text=" TFS" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="This is similar t Top-P but more advanced(Read llama.cpp docs). 1.0 = Disabled"/>
+                                        </HorizontalStackLayout>
+
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="MinPEntry" BackgroundColor="Black" TextColor="White" Text="0.1" Placeholder="0.1" MaxLength="8" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="MinPEntry_TextChanged"></Entry>
+                                            <Label Text=" Min-P" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="The Min-P sampling method was designed as an alternative to Top-P, and aims to ensure a balance of quality and variety. It filters out probabilities less than Min-P"/>
+                                        </HorizontalStackLayout>
+
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="PrPenEntry" BackgroundColor="Black" TextColor="White" Text="0.0" Placeholder="0.0" MaxLength="8" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="PrPenEntry_TextChanged"></Entry>
+                                            <Label Text=" Presence Penalty" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Modifies the probability of words in the input text, making them less likely to repeat in the output"/>
+                                        </HorizontalStackLayout>
+
+                                        <Frame BackgroundColor="White" Margin="5">
+                                            <StackLayout>
+                                                <HorizontalStackLayout Spacing="0">
+                                                    <Label Text="Mirostat Sampling:" VerticalOptions="Center" TextColor="Black"/>
+                                                    <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Mirostat is an algorithm that actively maintains the quality of generated text within a desired range during text generation. It aims to strike a balance between coherence and diversity, avoiding low-quality output caused by excessive repetition (boredom traps) or incoherence (confusion traps)"/>
+                                                </HorizontalStackLayout>
+                                                <Frame Margin="5,0,5,10"></Frame>
+
+                                                <StackLayout Orientation="Vertical" Spacing="0" VerticalOptions="Center" Padding="0,0,0,0">
+                                                    <HorizontalStackLayout>
+                                                        <Label TextColor="Black" Text="Mirostat Mode:" VerticalOptions="Center"/>
+                                                        <ImageButton Source="questionmark.png" Scale="0.3" WidthRequest="20" HeightRequest="20" Aspect="AspectFit" BackgroundColor="Transparent" ToolTipProperties.Text="Please read the llama.cpp docs for more information" />
+                                                    </HorizontalStackLayout>
+                                                    <Picker BackgroundColor="Black" TextColor="White" ItemsSource="{Binding MirostatOptions}" SelectedItem="{Binding SelectedMirostat}" VerticalOptions="CenterAndExpand"/>
+                                                </StackLayout>
+
+
+                                                <HorizontalStackLayout Spacing="1">
+                                                    <Entry x:Name="ETAEntry" BackgroundColor="Black" TextColor="White" Text="0.1" Placeholder="0.1" MaxLength="8" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="EtaEntry_TextChanged"></Entry>
+                                                    <Label Text=" Eta" VerticalOptions="Center" TextColor="Black"/>
+                                                    <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="This sets the Mirostat learning rate"/>
+                                                </HorizontalStackLayout>
+                                                
+                                                <HorizontalStackLayout Spacing="1">
+                                                    <Entry x:Name="TAUEntry" BackgroundColor="Black" TextColor="White" Text="1.0" Placeholder="1.0" MaxLength="8" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="TauEntry_TextChanged"></Entry>
+                                                    <Label Text=" Tau" VerticalOptions="Center" TextColor="Black"/>
+                                                    <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="This option sets the Mirostat target entropy, which represents the desired perplexity value for the generated text"/>
+                                                </HorizontalStackLayout>
+
+                                            </StackLayout>
+                                        </Frame>
+                                    </StackLayout>
+                                </Frame>
+                            </VerticalStackLayout>
+
+                            <!-- Media Tab Content -->
+                            <VerticalStackLayout x:Name="MediaTabContent" IsVisible="False" Spacing="20">
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="ComfyUI Integration:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="ComfyUI is an advanced tool for creating AI images using a drag-and-drop system, where you connect blocks (nodes) to customize your results."/>
+                                            <Button Text="Setup" Clicked="setupCuiClicked" Margin="330,0,0,0" Background="Black" BorderColor="OrangeRed" TextColor="OrangeRed" BorderWidth="1"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="10"/>
+                                        <HorizontalStackLayout>
+                                            <Entry x:Name="cuiDetectTextbox" Text="No ComfyUI detected" BackgroundColor="Black" TextColor="OrangeRed" PlaceholderColor="DimGray" WidthRequest="200" IsReadOnly="True"/>
+                                            <Entry x:Name="cuiPortTextbox" BackgroundColor="Black" TextColor="White" Text="5000" Placeholder="5000" MaxLength="4" MinimumWidthRequest="90" Keyboard="Numeric" TextChanged="cuiPortEntry_TextChanged"></Entry>
+                                            <Button Text="Detect" Clicked="detectCuiClicked" Margin="220,0,0,0" BackgroundColor="#007aff" TextColor="White"/>
+                                        </HorizontalStackLayout>
+
+                                        <!-- Clutch Models on Generation Checkbox -->
+                                        <StackLayout Orientation="Horizontal" Spacing="1" VerticalOptions="Center" Padding="0,0,0,0">
+                                            <CheckBox x:Name="UseMClutchingBox" IsChecked="True" Color="#007aff" CheckedChanged="UseClutching_CheckedChanged"/>
+                                            <Label TextColor="Black" Text="Clutch Models on Generation" VerticalOptions="Center"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="When requesting a generation from ComfyUI, KoboldCS will push the current loaded LLM into the RAM to make VRAM space for the Checkpoint model and clutch them back after generation. Speeds up generation(massively) in most cases." />
+                                        </StackLayout>
+
+                                       
+                                    </StackLayout>
+                                </Frame>
+                            </VerticalStackLayout>
+
+                            <!-- Advanced Tab Content -->
+                            <VerticalStackLayout x:Name="AdvancedTabContent" IsVisible="False" Spacing="20">
+                                <Label Text="Advanced Content" VerticalOptions="Center" HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </ScrollView>
+                </Grid>
+            </Border>
+        </ContentView>
+
+
+
+
+        <!-- Context Menu-->
+        <ContentView x:Name="ContextPanel"
+             IsVisible="False"
+             BackgroundColor="Transparent"
+             Grid.Row="0"
+             Grid.RowSpan="2"
+             HorizontalOptions="Center"
+             VerticalOptions="Center"
+             WidthRequest="800"
+             HeightRequest="400">
+            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10,10,10,10">
+                <Grid>
+                    <!-- Define the row and column definitions -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <!-- Row for side menu -->
+                        <RowDefinition Height="*"/>
+                        <!-- Row for content -->
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+
+                        <ColumnDefinition Width="150"/>
+                        <!-- Side menu width -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- Content area -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- TopBar -->
+                    <StackLayout BackgroundColor="Black" Grid.ColumnSpan="2" HorizontalOptions="FillAndExpand">
+                        <Label Text="Context" FontSize="11" HorizontalTextAlignment="Center"/>
+
+                        <Button Text="X"
+                                TranslationY="-29"
+                                TranslationX="11"
+                                BorderColor="Transparent"
+                                Scale="0.5"
+                                FontSize="19"
+                                CornerRadius="0"
+                                Clicked="OnContextXButtonClicked"
+                                TextColor="Red"
+                                BorderWidth="1"
+                                BackgroundColor="Transparent"
+                                HorizontalOptions="End"/>
+                    </StackLayout>
+
+                    <!-- Side Menu -->
+                    <StackLayout
+                             Grid.Column="0"
+                             Grid.Row="2"
+                             BackgroundColor="DarkGray"
+                             Orientation="Vertical">
+                        <Button x:Name="MemoryTabButton" 
+                            Text="Memory" 
+                            Clicked="OnContextTabButtonClicked"
+                            Command="{Binding ContextTabSelectedCommand}"
+                            CommandParameter="MemoryTab"
+                            Style="{StaticResource TabButtonStyle}"
+                            BackgroundColor="Transparent"
+                            BorderColor="Transparent"
+                            Padding="10,10">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding SelectedTabContext}" Value="MemoryTab">
+                                    <Setter Property="BackgroundColor" Value="DimGrey"/>
+                                    <Setter Property="TextColor" Value="White"/>
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button x:Name="TokensTabButton"
+                            Text="Tokens" 
+                            Clicked="OnContextTabButtonClicked" 
+                            Command="{Binding ContextTabSelectedCommand}"
+                            CommandParameter="TokensTab"
+                            Style="{StaticResource TabButtonStyle}"
+                            BackgroundColor="Transparent"
+                            BorderColor="Transparent"
+                            Padding="10,10">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding SelectedTabContext}" Value="TokensTab">
+                                    <Setter Property="BackgroundColor" Value="DimGrey"/>
+                                    <Setter Property="TextColor" Value="White"/>
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Button x:Name="LogitsTabButton"
+                            Text="Logits" 
+                            Clicked="OnContextTabButtonClicked" 
+                            Command="{Binding ContextTabSelectedCommand}"
+                            CommandParameter="LogitsTab"
+                            Style="{StaticResource TabButtonStyle}"
+                            BackgroundColor="Transparent"
+                            BorderColor="Transparent"
+                            Padding="10,10">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding SelectedTabContext}" Value="LogitsTab">
+                                    <Setter Property="BackgroundColor" Value="DimGrey"/>
+                                    <Setter Property="TextColor" Value="White"/>
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </StackLayout>
+
+                    <!-- Content Area -->
+                    <ScrollView Grid.Row="1" Grid.Column="1" BackgroundColor="White" VerticalOptions="FillAndExpand" VerticalScrollBarVisibility="Always" >
+                        <Grid Padding="10" IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}">
+                            <!-- Memory Tab Content -->
+                            <VerticalStackLayout x:Name="MemoryTabContent" IsVisible="True" Spacing="20">
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Memory:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Put the information you want the AI to always remember. It will be inserted into the top of every request sent to the AI."/>
+                                            <Label TextColor="Black" Text="Add NewLine" VerticalTextAlignment="Center" Margin="370,0,0,0"/>
+                                            <CheckBox x:Name="AddNewLineMemoryCheckBox" HorizontalOptions="Center" IsChecked="{Binding AddNewLineMemory}" Color="#007aff" Margin="0,0,0,0"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="5,0,5,10"></Frame>
+                                        <Grid>
+                                            <Editor x:Name="MemoryEntry" BackgroundColor="LightBlue" TextColor="Black" Text="{Binding MemoryText}" HeightRequest="250" VerticalOptions="StartAndExpand" VerticalTextAlignment="Start"/>
+
+                                        </Grid>
+                                    </StackLayout>
+                                </Frame>
+
+
+                            </VerticalStackLayout>
+
+                            <!-- Tokens Tab Content -->
+                            <VerticalStackLayout x:Name="TokensTabContent" IsVisible="False" Spacing="20">
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Extra Stopping Sequences:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Triggers the text generator to stop generating early if this sequence appears, in addition to default stop sequences. The '|' chars are only to show whitespaces as visual markers and won't be included in the Stop-Sequences."/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="5,0,5,10"></Frame>
+                                        <Grid>
+                                            <Button Text="Add New Sequence" Command="{Binding AddNewSequenceCommand}" />
+                                        </Grid>
+                                        <Frame Margin="5"></Frame>
+
+                                        <CollectionView ItemsSource="{Binding StopSequences}" Margin="5">
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Frame CornerRadius="20" BackgroundColor="LightGray" Margin="10">
+                                                        <StackLayout>
+                                                            <Label Text="{Binding . }" VerticalOptions="Start" HorizontalOptions="Center" TextColor="White" BackgroundColor="Black"/>
+                                                            <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="5">
+                                                                <Button Text="Edit"
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditStopSequenceCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                                <Button Text="Remove"
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveStopSequenceCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </StackLayout>
+                                                        </StackLayout>
+                                                    </Frame>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
+
+                                    </StackLayout>
+                                </Frame>
+                            </VerticalStackLayout>
+
+
+                            <!-- Logits Tab Content -->
+                            <VerticalStackLayout x:Name="LogitsTabContent" IsVisible="False" Spacing="20">
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Logit Bias:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" 
+                                                         ToolTipProperties.Text="AIs work with probabilities when choosing the next token. A logit bias modifies the chance of 
+                                                         a token to appear as next, by adding a value to the token's raw score(logit), which affects the final probability."/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="5,0,5,10"></Frame>
+                                        <Grid>
+                                            <Button Text="Add New Logit Modifier" Clicked="AddNewLogitModifierClicked" />
+                                        </Grid>
+                                        <Frame Margin="5"></Frame>
+
+                                        <CollectionView ItemsSource="{Binding LogitBiasCollection}" Margin="5">
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Frame CornerRadius="20" BackgroundColor="LightGray" Margin="10">
+                                                        <VerticalStackLayout>
+                                                            <Label Text="{Binding Token}" VerticalOptions="Start" HorizontalOptions="Center" TextColor="White" BackgroundColor="DimGray"/>
+                                                            <Label Text="{Binding Bias, StringFormat='{}{0:P0}'}" VerticalOptions="Start" HorizontalOptions="Center" TextColor="Lime"/>
+                                                            <Button Text="Edit"
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditLogitModifierCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            <Button Text="Remove"
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveLogitModifierCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                        </VerticalStackLayout>
+                                                    </Frame>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
+
+                                    </StackLayout>
+                                </Frame>
+                            </VerticalStackLayout>
+
+                        </Grid>
+                    </ScrollView>
+                </Grid>
+            </Border>
+        </ContentView>
+
+        <uie:LogitModifierPrompt x:Name="LogitModifierPanel"
+                                IsVisible="False"
+                                BackgroundColor="Transparent"
+                                Grid.Row="0"
+                                Grid.RowSpan="2"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                WidthRequest="400"
+                                HeightRequest="300"
+                                Opacity="0">
+            <uie:LogitModifierPrompt.Shadow>
+                <Shadow Brush="Black"
+                Offset="0,15"
+                Radius="200"
+                Opacity="1" />
+            </uie:LogitModifierPrompt.Shadow>
+        </uie:LogitModifierPrompt>
+
+
+
+
+
+
+
+
+
+
+        <!-- Context Menu-->
+        <ContentView x:Name="AddImgPanel"
+        IsVisible="False"
+        BackgroundColor="Transparent"
+        Grid.Row="0"
+        Grid.RowSpan="2"
+        HorizontalOptions="Center"
+        VerticalOptions="Center"
+        WidthRequest="800"
+        HeightRequest="400">
+            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10,10,10,10">
+                <Grid>
+                    <!-- Define the row and column definitions -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <!-- Row for side menu -->
+                        <RowDefinition Height="*"/>
+                        <!-- Row for content -->
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+
+                        <ColumnDefinition Width="150"/>
+                        <!-- Side menu width -->
+                        <ColumnDefinition Width="*"/>
+                        <!-- Content area -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- TopBar -->
+                    <StackLayout BackgroundColor="Black" Grid.ColumnSpan="2" HorizontalOptions="FillAndExpand">
+                        <Label Text="Add/Generate Image" FontSize="11" HorizontalTextAlignment="Center"/>
+
+                        <Button Text="X"
+                        TranslationY="-29"
+                        TranslationX="11"
+                        BorderColor="Transparent"
+                        Scale="0.5"
+                        FontSize="19"
+                        CornerRadius="0"
+                        Clicked="OnAddImgXButtonClicked"
+                        TextColor="Red"
+                        BorderWidth="1"
+                        BackgroundColor="Transparent"
+                        HorizontalOptions="End"/>
+                    </StackLayout>
+
+                    <!-- Side Menu -->
+                    <StackLayout
+                             Grid.Column="0"
+                             Grid.Row="2"
+                             BackgroundColor="DarkGray"
+                             Orientation="Vertical">
+
+                        <Button Margin="5" Text="Generate Summary" FontSize="12" BackgroundColor="#007aff" Command="{Binding GenSummaryCommand}"/>
+                        <Button Margin="5" Text="Generate Image" FontSize="12" BackgroundColor="Green" Command="{Binding GenImgCommand}"/>
+                        
+                        <Label Text="or" TextColor="Black" HorizontalOptions="Center"/>
+                        <!-- LFM = Last Four Messages-->
+                        <Button Margin="5" Text="Generate Image with the last 4 Messages" FontSize="12" BackgroundColor="Green" LineBreakMode="WordWrap" Command="{Binding GenLFMCommand}"/>
+                    </StackLayout>
+
+                    <!-- Content Area -->
+                    <ScrollView Grid.Row="1" Grid.Column="1" BackgroundColor="White" VerticalOptions="FillAndExpand" VerticalScrollBarVisibility="Always" >
+                        <Grid Padding="10" IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}">
+                            
+                            <!-- Tab Content -->
+                            <VerticalStackLayout x:Name="AddImgGenOpTabContent" IsVisible="True" Spacing="20">
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Prompt to send:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="You may generate a scene summary and/or input/edit your own prompt. This will be sent as the external prompt to the custom 'KSampler (External Prompt/Advanced)' node. Static Prompts like 'Masterpiece, ...' goes into the Text Box of the custom node in CUI"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="5,0,5,10"></Frame>
+                                        <Grid>
+                                            <Editor x:Name="AddImgEntry" BackgroundColor="LightBlue" TextColor="Black" Placeholder="Please Input Prompt (Optional)" Text="{Binding AddImgEntryText}" HeightRequest="250" VerticalOptions="StartAndExpand" VerticalTextAlignment="Start"/>
+
+                                        </Grid>
+                                    </StackLayout>
+                                </Frame>
+
+                            </VerticalStackLayout>
+                        </Grid>
+                    </ScrollView>
+                </Grid>
+            </Border>
+        </ContentView>
+
+
+
+
+
+
+        <!--                                            NEXT STAGE -->
+
+
+        
+        
+        
+        <!--Advanced Menu stuff-->
+        <ContentView x:Name="AdvMenuPanel"
+             IsVisible="False"
+             BackgroundColor="Transparent"
+             Grid.Row="0"
+             Grid.RowSpan="2"
+             HorizontalOptions="Center"
+             VerticalOptions="Center"
+             WidthRequest="800"
+             HeightRequest="380"
+                     TranslationY="12">
+            <Border BackgroundColor="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 10,10,10,10">
+                <Grid>
+                    <!-- Define the row and column definitions -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <!-- Row for side menu -->
+                        <RowDefinition Height="*"/>
+                        <!-- Row for content -->
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <!-- Content area -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- TopBar -->
+                    <StackLayout BackgroundColor="Black" Grid.ColumnSpan="2" HorizontalOptions="FillAndExpand">
+                        <Label Text="Advanced Settings" FontSize="11" HorizontalTextAlignment="Center"/>
+
+                        <Button Text="X"
+                                TranslationY="-29"
+                                TranslationX="11"
+                                BorderColor="Transparent"
+                                Scale="0.5"
+                                FontSize="19"
+                                CornerRadius="0"
+                                Clicked="OnAdvSettingsXButtonClicked"
+                                TextColor="Red"
+                                BorderWidth="1"
+                                BackgroundColor="Transparent"
+                                HorizontalOptions="End"/>
+                    </StackLayout>
+
+
+                    <!-- Content Area -->
+                    <ScrollView Grid.Row="1" BackgroundColor="White" VerticalOptions="FillAndExpand" VerticalScrollBarVisibility="Always">
+                        <VerticalStackLayout Padding="10" IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}">
+                            <!-- Advanced Tab Content -->
+                            <VerticalStackLayout x:Name="AdvTabContent" IsVisible="True" Spacing="20">
+
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="General Settings:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Any other configurations"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="5,0,5,10"></Frame>
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="LayersToOffloadEntry" BackgroundColor="Black" TextColor="White" Text="100" Placeholder="100" MaxLength="3" Keyboard="Numeric" TextChanged="LayersEntry_TextChanged"></Entry>
+                                            <Label Text=" Layers to offload" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="This is the max amount of (model) layers to offload into your VRAM, overflow will be loaded into RAM"/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="ThreadsEntry" BackgroundColor="Black" TextColor="White" Text="0" Placeholder="0" MaxLength="3" Keyboard="Numeric" TextChanged="ThreadsEntry_TextChanged"></Entry>
+                                            <Label Text=" Threads" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="The amount of threads to use for generation. Leave on 0 to autodetect."/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="RopeFreqScaleEntry" BackgroundColor="Black" TextColor="White" Text="1.0" Placeholder="1.0" MaxLength="6" Keyboard="Numeric" TextChanged="RoPEScaleEntry_TextChanged"></Entry>
+                                            <Label Text=" Rope Frequency Scale" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="A method for encoding positional information in transformer models to improve their understanding of sequence order and structure"/>
+                                        </HorizontalStackLayout>
+                                    </StackLayout>
+                                </Frame>
+
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Cache Settings:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Those are settings to change the KV Cache's behaviour"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="5,0,5,10"></Frame>
+
+                                        <!-- Use ManualMap Checkbox -->
+                                        <StackLayout Orientation="Horizontal" Spacing="1" VerticalOptions="Center" Padding="0,0,0,0">
+                                            <CheckBox x:Name="UsemmapCheckBox" IsChecked="True" Color="#007aff" CheckedChanged="ManualMap_CheckedChanged"/>
+                                            <Label TextColor="Black" Text="Use ManualMap" VerticalOptions="Center"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Enabled by default to speed up model loading" />
+                                        </StackLayout>
+
+                                        <!-- Use Memory Lock Checkbox -->
+                                        <StackLayout Orientation="Horizontal" Spacing="1" VerticalOptions="Center" Padding="0,0,0,0">
+                                            <CheckBox x:Name="UsemlockCheckBox" IsChecked="False" Color="#007aff" CheckedChanged="MemoryLock_CheckedChanged"/>
+                                            <Label TextColor="Black" Text="Use Memory Lock" VerticalOptions="Center"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" WidthRequest="20" HeightRequest="20" Aspect="AspectFit" BackgroundColor="Transparent" ToolTipProperties.Text="Avoid using the RAM when offloading doesn't fit into VRAM" />
+                                        </StackLayout>
+
+                                        <!-- Use FlashAttention Checkbox -->
+                                        <StackLayout Orientation="Horizontal" Spacing="1" VerticalOptions="Center" Padding="0,0,0,0">
+                                            <CheckBox x:Name="UseFACheckBox" IsChecked="True" Color="#007aff" CheckedChanged="FlashAttention_CheckedChanged"/>
+                                            <Label TextColor="Black" Text="Use FlashAttention" VerticalOptions="Center"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" WidthRequest="20" HeightRequest="20" Aspect="AspectFit" BackgroundColor="Transparent" ToolTipProperties.Text="Algorithm designed to enhance efficiency. Speed may vary" />
+                                        </StackLayout>
+
+                                        <!-- Picker for Precision Type -->
+                                        <StackLayout Orientation="Vertical" Spacing="0" VerticalOptions="Center" Padding="0,0,0,0">
+                                            <HorizontalStackLayout>
+                                                <Label TextColor="Black" Text="K/V Precision Type:" VerticalOptions="Center"/>
+                                                <ImageButton Source="questionmark.png" Scale="0.3" WidthRequest="20" HeightRequest="20" Aspect="AspectFit" BackgroundColor="Transparent" ToolTipProperties.Text="Reduce context size/precision with different KV Cache types. FlashAttention needs to be enabled. Warning: Wong settings will cause instand crashes" />
+                                            </HorizontalStackLayout>
+                                            <Picker BackgroundColor="Black" TextColor="White" ItemsSource="{Binding PrecisionOptions}" SelectedItem="{Binding SelectedPrecision}" SelectedIndexChanged="PrecisionPicker_SelectedIndexChanged" VerticalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+
+                                        <!-- No KV Offload Checkbox -->
+                                        <StackLayout Orientation="Horizontal" Spacing="1" VerticalOptions="Center" Padding="0,0,0,0">
+                                            <CheckBox x:Name="NoKvOffloadCheckBox" IsChecked="False" Color="#007aff" CheckedChanged="NoKVOffload_CheckedChanged"/>
+                                            <Label TextColor="Black" Text="No KV Offload" VerticalOptions="Center"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" WidthRequest="20" HeightRequest="20" Aspect="AspectFit" BackgroundColor="Transparent" ToolTipProperties.Text="Put the KV Cache(Context) into RAM instead of VRAM" />
+                                        </StackLayout>
+
+                                    </StackLayout>
+                                </Frame>
+                                
+                                <Frame BackgroundColor="White">
+                                    <StackLayout>
+                                        <HorizontalStackLayout Spacing="0">
+                                            <Label Text="Batch Settings:" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Those are settings to change the batch processing"/>
+                                        </HorizontalStackLayout>
+                                        <Frame Margin="5,0,5,10"></Frame>
+                                        <HorizontalStackLayout Spacing="1">
+                                            <Entry x:Name="BatchsizeEntry" BackgroundColor="Black" TextColor="White" Text="512" Placeholder="512" MaxLength="4" Keyboard="Numeric" TextChanged="BatchSizeEntry_TextChanged"></Entry>
+                                            <Label Text=" BatchSize" VerticalOptions="Center" TextColor="Black"/>
+                                            <ImageButton Source="questionmark.png" Scale="0.3" Aspect="AspectFit" WidthRequest="20" HeightRequest="20" BackgroundColor="Transparent" ToolTipProperties.Text="Think of processing in chunks. Set to >= 32 to use BLAS"/>
+                                        </HorizontalStackLayout>
+                                    </StackLayout>
+                                </Frame>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </ScrollView>
+                </Grid>
+            </Border>
+        </ContentView>
+
+
+
+        <!-- Loading Indicator and Text -->
+        <Grid Grid.Row="1"
+      HorizontalOptions="FillAndExpand"
+      VerticalOptions="FillAndExpand"
+      IsVisible="{Binding IsLoading}">
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       Color="Cyan"
+                       PropertyChanged="ActivityIndicator_PropertyChanged"
+                       x:Name="Throbber"/>
+            <Label x:Name="LoadingLabel"
+           Text="Loading..."
+           HorizontalOptions="Center"
+           VerticalOptions="Center"
+           TextColor="Cyan"
+           Opacity="0"
+           IsVisible="{Binding IsLoading}" Margin="0,50,0,0"/>
+        </Grid>
+    </Grid>
+</ContentPage>

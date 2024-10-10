@@ -1,0 +1,155 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+    <TargetFrameworks>net8.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
+		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
+
+		<!-- Note for MacCatalyst:
+		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
+		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
+		The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
+		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
+		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
+
+
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Koboldcs</RootNamespace>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+		<!-- Display name -->
+		<ApplicationTitle>Koboldcs</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>com.companyname.koboldcs</ApplicationId>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+    <UseRidGraph>true</UseRidGraph>
+
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+    <DefaultLanguage>en-us</DefaultLanguage>
+    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+    <PackageCertificateKeyFile>Koboldcs_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+    <GenerateTestArtifacts>True</GenerateTestArtifacts>
+    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+
+  </PropertyGroup>
+
+	  
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	  
+	<ItemGroup>
+	  <AndroidResource Remove="LLamaSharp\**" />
+	  <Compile Remove="LLamaSharp\**" />
+	  <EmbeddedResource Remove="LLamaSharp\**" />
+	  <MauiCss Remove="LLamaSharp\**" />
+	  <MauiXaml Remove="LLamaSharp\**" />
+	  <None Remove="LLamaSharp\**" />
+	</ItemGroup>
+
+	  
+	<ItemGroup>
+	  <None Remove="MainPage.xaml~RFf78f167.TMP" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.scale-100.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.scale-125.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.scale-150.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.scale-200.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.scale-400.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-16.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-16_altform-lightunplated.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-16_altform-unplated.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-24.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-24_altform-lightunplated.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-24_altform-unplated.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-256.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-256_altform-lightunplated.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-256_altform-unplated.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-32.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-32_altform-lightunplated.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-32_altform-unplated.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-48.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-48_altform-lightunplated.png" />
+	  <None Remove="Resources\AppIcon\AppIcons\%24placeholder%24.targetsize-48_altform-unplated.png" />
+	</ItemGroup>
+
+	  
+	<ItemGroup>
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.scale-100.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.scale-125.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.scale-150.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.scale-200.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.scale-400.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-16.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-16_altform-lightunplated.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-16_altform-unplated.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-24.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-24_altform-lightunplated.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-24_altform-unplated.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-256.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-256_altform-lightunplated.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-256_altform-unplated.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-32.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-32_altform-lightunplated.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-32_altform-unplated.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-48.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-48_altform-lightunplated.png" />
+	  <Content Include="Resources\AppIcon\AppIcons\$placeholder$.targetsize-48_altform-unplated.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui" Version="9.0.3" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+		<PackageReference Include="LLamaSharp.Backend.Cuda12" Version="0.15.0" />
+		<PackageReference Include="LLamaSharp.kernel-memory" Version="0.15.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.80" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.80" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+		<PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="LLamaSharp\LLama\LLamaSharp.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="CUI_InstallerSetupPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="UI_Elements\LogitModifierPrompt.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
+</Project>

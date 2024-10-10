@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Koboldcs.UI_Elements.LogitModifierPrompt">
+    <Border
+        BackgroundColor="Black"
+        StrokeThickness="2"
+        StrokeShape="RoundRectangle 20,20,20,20"
+        Margin="5" >
+            <StackLayout Padding="20" Spacing="5">
+                <Label Text="Enter the token (sequence) to be modified:" />
+            <Entry x:Name="TokenEntry" Placeholder="Token" Completed="OnOkClicked" />
+                
+            <Label Text="Select the bias value:" />
+            <StackLayout Orientation="Horizontal">
+                <Slider x:Name="BiasSlider" Minimum="0" Maximum="100" Value="50" ValueChanged="OnBiasSliderValueChanged" MinimumWidthRequest="300"/>
+                <Label x:Name="BiasPercentageLabel" Text="{Binding Source={x:Reference BiasSlider}, Path=Value, StringFormat='{}{0:F0}%'}" Padding="10,0,0,0" />
+            </StackLayout>
+
+            <Button Text="OK" Clicked="OnOkClicked" />
+                <Button Text="Cancel" Clicked="OnCancelClicked" />
+            </StackLayout>
+    </Border>
+</ContentView>
