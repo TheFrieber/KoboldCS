@@ -12,6 +12,6 @@ Currently there is no Discord Server to hand out support for people.
 
 ## Reporting a Vulnerability
 
-Please use the Issues page to report any bugs or issues.
-Currently there is no Discord Server to hand out support for people.
+Please report any vulnerability privately.
+Also possible via discord: thefrieber
 
