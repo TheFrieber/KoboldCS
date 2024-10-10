@@ -6,4 +6,5 @@ Adaption of KoboldCPP with the goal to add missing core features. Readme and fea
 ----
 Links:
 ComfyUI extension for external control: https://github.com/TheFrieber/ExtendedAPIHook
+
 LlamaSharp fork for KoboldCS: https://github.com/TheFrieber/LLamaSharp/tree/koboldcs
