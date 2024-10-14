@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Koboldcs.DataServices
 {
-    public class DataService
+    public class ConfigDataService
     {
         private string _configFilePath;
 
-        public DataService(string configFilePath)
+        public ConfigDataService(string configFilePath)
         {
             _configFilePath = configFilePath;
         }

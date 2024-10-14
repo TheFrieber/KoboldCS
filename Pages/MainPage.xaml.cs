@@ -101,7 +101,7 @@ namespace Koboldcs
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            DataService ds = new DataService("last.json");
+            ConfigDataService ds = new ConfigDataService("last.json");
             ds.SaveConfig();
         }
 
@@ -505,7 +505,7 @@ namespace Koboldcs
                 bool answer = await DisplayAlert(title, message, btn1, btn2);
                 if (answer)
                 {
-                    DataService ds = new DataService("last.json");
+                    ConfigDataService ds = new ConfigDataService("last.json");
                     ds.LoadConfig();
 
                 }
